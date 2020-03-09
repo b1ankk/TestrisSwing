@@ -76,6 +76,8 @@ public class GameScene extends Scene
         spriteHolder = new SpriteHolder();
         this.keyHandler = keyHandler;
 
+
+
         spriteHolder.addSpritePath(String.format("sprites/%s.png", BOARD), null);
         spriteHolder.addSpritePath(String.format("sprites/%s.png", SQUARE),
                 new SubSpriteFileProperties(35,35, 7, SQUARE_NAME.getAllNames()));
