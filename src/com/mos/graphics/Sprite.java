@@ -9,12 +9,8 @@ public class Sprite
     private final int width;
     private final int height;
     private final String name;
-
-//    public Sprite()
-//    {
-//
-//    }
-
+    
+    
     public Sprite(BufferedImage image, String name)
     {
         this.image = image;
@@ -23,17 +19,17 @@ public class Sprite
         width = image.getWidth();
         height = image.getHeight();
     }
-
+    
     public BufferedImage getImage()
     {
         return image;
     }
-
+    
     public String getName()
     {
         return name;
     }
-
+    
     @Override
     public boolean equals(Object o)
     {
@@ -41,21 +37,21 @@ public class Sprite
         if (!(o instanceof Sprite)) return false;
         Sprite sprite = (Sprite) o;
         return width == sprite.width &&
-                height == sprite.height &&
-                Objects.equals(image, sprite.image);
+               height == sprite.height &&
+               Objects.equals(image, sprite.image);
     }
-
+    
     @Override
     public int hashCode()
     {
         return Objects.hash(image, width, height);
     }
-
+    
     public int getWidth()
     {
         return width;
     }
-
+    
     public int getHeight()
     {
         return height;

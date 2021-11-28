@@ -5,13 +5,14 @@ import java.util.Set;
 
 public class Physics
 {
-    private static Set<Collidable> collidableObjects = new HashSet<>();
-
+    private static final Set<Collidable> collidableObjects = new HashSet<>();
+    
+    
     public static void addCollidable(Collidable c)
     {
         collidableObjects.add(c);
     }
-
+    
     public static void checkCollisions()
     {
         for (Collidable c1 : collidableObjects)

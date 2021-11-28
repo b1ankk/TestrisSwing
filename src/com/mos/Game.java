@@ -11,46 +11,48 @@ import java.awt.image.BufferedImage;
 
 public class Game implements Runnable
 {
-    private String title;
-    private int width;
-    private int height;
-
+    private final String title;
+    private final int width;
+    private final int height;
+    
     private boolean running = false;
-
-    private Window window;
+    
+    private final Window window;
     private Thread thread;
-
+    
     private KeyHandler keyHandler;
-
+    
     private BufferedImage bufferedImage;
     private Graphics2D g;
     private Canvas canvas;
-
+    
     private BufferStrategy bufferStrategy;
     
     private Scene activeScene;
-
+    
+    
     public Game(int width, int height, String title)
     {
         window = new Window(width, height, title);
         this.title = title;
         this.width = width;
         this.height = height;
-
+        
     }
-
+    
+    
     public void start()
     {
         thread = new Thread(this);
         thread.setName("GameThread");
         thread.start();
     }
-
+    
     private void update()
     {
         activeScene.update();
     }
-
+    
     private void render()
     {
         g.setColor(Color.LIGHT_GRAY);
@@ -58,7 +60,7 @@ public class Game implements Runnable
         
         activeScene.render(g);
     }
-
+    
     private void draw()
     {
         Graphics2D g2 = (Graphics2D) bufferStrategy.getDrawGraphics();
@@ -66,12 +68,12 @@ public class Game implements Runnable
         g2.dispose();
         bufferStrategy.show();
     }
-
+    
     private void input()
     {
         activeScene.input();
     }
-
+    
     private void init()
     {
         running = true;
@@ -80,30 +82,30 @@ public class Game implements Runnable
         
         bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         g = (Graphics2D) bufferedImage.getGraphics();
-
+        
         bufferStrategy = canvas.getBufferStrategy();
         
         activeScene = new GameScene(keyHandler);
     }
-
+    
     @Override
     public void run()
     {
         init();
-
+        
         double goalFrameRate = 60;
         double frameTime = 1_000_000_000 / goalFrameRate;
         long lastFrame = System.nanoTime();
-
+        
         GameTime.setDeltaTime(frameTime);
-
+        
         long timer = System.currentTimeMillis();
         int frames = 0;
-
+        
         while (running)
         {
             long now = System.nanoTime();
-
+            
             input();
             keyHandler.clearActiveStates();
             while (now - lastFrame < frameTime)
@@ -111,7 +113,7 @@ public class Game implements Runnable
                 update();
                 now = System.nanoTime();
             }
-
+            
             GameTime.setDeltaTime(System.nanoTime() - lastFrame);
             lastFrame = System.nanoTime();
             render();
@@ -125,6 +127,5 @@ public class Game implements Runnable
                 timer += 1000;
             }
         }
-
     }
 }

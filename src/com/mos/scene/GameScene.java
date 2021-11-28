@@ -22,66 +22,38 @@ import java.util.List;
 
 public class GameScene extends Scene
 {
-    private SpriteHolder spriteHolder;
-    private KeyHandler keyHandler;
-
+    private final SpriteHolder spriteHolder;
+    private final KeyHandler keyHandler;
+    
     public static final String BOARD = "TetrisBoard10x20";
     public static final String SQUARE = "BaseSprites";
-
-    public static final class SQUARE_NAME
-    {
-        public static final String RED = "red";
-        public static final String PURPLE = "purple";
-        public static final String GREEN = "green";
-        public static final String YELLOW = "yellow";
-        public static final String ORANGE = "orange";
-        public static final String BLUE = "blue";
-        public static final String CYAN = "cyan";
-
-        private SQUARE_NAME(){}
-
-        private static List<String> getAllNames()
-        {
-            List<String> nameList = new ArrayList<>();
-            nameList.add(RED);
-            nameList.add(PURPLE);
-            nameList.add(GREEN);
-            nameList.add(YELLOW);
-            nameList.add(ORANGE);
-            nameList.add(BLUE);
-            nameList.add(CYAN);
-
-            return Collections.unmodifiableList(nameList);
-        }
-
-        private static String getFullName(String s)
-        {
-            return SQUARE + "_" + s;
-        }
-    }
-
-
+    
     public static final int BOARD_POSITION_X = 32;
     public static final int BOARD_POSITION_Y = 32;
-
+    
     private final int DROP_PAUSE_TIME = 800;
     private final int SHAPE_RESPAWN_TIME = 400;
-
+    
     private Shape shape;
     private static Board board;
-    private ShapeGenerator shapeGenerator = new FairShapeGenerator();
-    private ScoreHolder scoreHolder;
-
+    private final ShapeGenerator shapeGenerator = new FairShapeGenerator();
+    private final ScoreHolder scoreHolder;
+    
+    private Timer downTimer;
+    
+    
     public GameScene(KeyHandler keyHandler)
     {
         spriteHolder = new SpriteHolder();
         this.keyHandler = keyHandler;
         
         spriteHolder.addSpritePath(String.format("sprites/%s.png", BOARD), null);
-        spriteHolder.addSpritePath(String.format("sprites/%s.png", SQUARE),
-                new SubSpriteFileProperties(35,35, 7, SQUARE_NAME.getAllNames()));
+        spriteHolder.addSpritePath(
+            String.format("sprites/%s.png", SQUARE),
+            new SubSpriteFileProperties(35, 35, 7, SQUARE_NAME.getAllNames())
+        );
         spriteHolder.loadSprites();
-
+        
         I_Shape.setSprite(spriteHolder.getSprite(SQUARE_NAME.getFullName(SQUARE_NAME.CYAN)));
         J_Shape.setSprite(spriteHolder.getSprite(SQUARE_NAME.getFullName(SQUARE_NAME.BLUE)));
         L_Shape.setSprite(spriteHolder.getSprite(SQUARE_NAME.getFullName(SQUARE_NAME.YELLOW)));
@@ -89,28 +61,28 @@ public class GameScene extends Scene
         S_Shape.setSprite(spriteHolder.getSprite(SQUARE_NAME.getFullName(SQUARE_NAME.GREEN)));
         T_Shape.setSprite(spriteHolder.getSprite(SQUARE_NAME.getFullName(SQUARE_NAME.PURPLE)));
         Z_Shape.setSprite(spriteHolder.getSprite(SQUARE_NAME.getFullName(SQUARE_NAME.RED)));
-
+        
         board = new Board(BOARD_POSITION_X, BOARD_POSITION_Y, spriteHolder.getSprite(Board.getSpriteName()));
-
+        
         scoreHolder = new ScoreHolder(
             board.getPosition().getX() + board.PIXEL_WIDTH + 100,
             board.getPosition().getY() + 30
         );
-
+        
         shape = shapeGenerator.next();
     }
-
-    private Timer downTimer;
+    
+    
     public void input()
     {
         final int offset = Shape.MODULE_SIDE_PIXEL_LENGTH;
         final int timerDelay = 50;
-
+        
         if (keyHandler.up.wasPressed())
         {
             shape.move(Vector.UP, offset);
         }
-
+        
         if (keyHandler.down.wasPressed())
         {
             downTimer = new Timer(timerDelay, e -> moveShape(Vector.DOWN, offset));
@@ -120,29 +92,29 @@ public class GameScene extends Scene
         {
             downTimer.stop();
         }
-
+        
         if (keyHandler.left.wasPressed())
         {
             moveShape(Vector.LEFT, offset);
         }
-
+        
         if (keyHandler.right.wasPressed())
         {
             moveShape(Vector.RIGHT, offset);
         }
-
+        
         if (keyHandler.z.wasPressed())
         {
             smartRotateL();
         }
-
+        
         if (keyHandler.x.wasPressed())
         {
             smartRotateR();
         }
     }
-
-
+    
+    
     @Override
     public void update()
     {
@@ -155,7 +127,7 @@ public class GameScene extends Scene
             moveShape(Vector.DOWN, Shape.MODULE_SIDE_PIXEL_LENGTH);
             GameTime.restartTimer(dropTimer);
         }
-
+        
         if (!canShapeMove(Vector.DOWN, true))
         {
             GameTime.startTimer(respawnTimer);
@@ -166,12 +138,12 @@ public class GameScene extends Scene
                 GameTime.deleteTimer(respawnTimer);
             }
         }
-
+        
         int counter = 0;
-
+        
         while (board.returnDeleteFullRows() != 0)
             counter++;
-
+        
         switch (counter)
         {
             case 1:
@@ -187,7 +159,7 @@ public class GameScene extends Scene
                 scoreHolder.add(1200);
         }
     }
-
+    
     @Override
     public void render(Graphics2D g)
     {
@@ -210,9 +182,7 @@ public class GameScene extends Scene
     {
         return moveShape(direction, stepCount, true);
     }
-
-
-
+    
     private boolean canShapeMove(Vector direction, boolean checkBorder)
     {
         try
@@ -228,21 +198,20 @@ public class GameScene extends Scene
         {
             return !checkBorder;
         }
-
+        
         return true;
     }
-
-
+    
     private void smartRotateR()
     {
         smartRotate(shape::rotateR, shape::rotateL);
     }
-
+    
     private void smartRotateL()
     {
         smartRotate(shape::rotateL, shape::rotateR);
     }
-
+    
     private void smartRotate(Runnable rotate, Runnable derotate)
     {
         rotate.run();
@@ -259,7 +228,7 @@ public class GameScene extends Scene
         }
         catch (IndexOutOfBoundsException e)
         {
-            for (Iterator<Module> itr = shape.getModules().iterator(); itr.hasNext();)
+            for (Iterator<Module> itr = shape.getModules().iterator(); itr.hasNext(); )
             {
                 Module m = itr.next();
                 if (m.getBoardPosition().getX() < 0)
@@ -289,10 +258,43 @@ public class GameScene extends Scene
             }
         }
     }
-
-
+    
     public static Board getBoard()
     {
         return board;
+    }
+    
+    
+    
+    public static final class SQUARE_NAME
+    {
+        public static final String RED = "red";
+        public static final String PURPLE = "purple";
+        public static final String GREEN = "green";
+        public static final String YELLOW = "yellow";
+        public static final String ORANGE = "orange";
+        public static final String BLUE = "blue";
+        public static final String CYAN = "cyan";
+        
+        private SQUARE_NAME() {}
+        
+        private static List<String> getAllNames()
+        {
+            List<String> nameList = new ArrayList<>();
+            nameList.add(RED);
+            nameList.add(PURPLE);
+            nameList.add(GREEN);
+            nameList.add(YELLOW);
+            nameList.add(ORANGE);
+            nameList.add(BLUE);
+            nameList.add(CYAN);
+            
+            return Collections.unmodifiableList(nameList);
+        }
+        
+        private static String getFullName(String s)
+        {
+            return SQUARE + "_" + s;
+        }
     }
 }
