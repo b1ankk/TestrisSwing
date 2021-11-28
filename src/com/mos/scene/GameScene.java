@@ -8,6 +8,7 @@ import com.mos.game_objects.shapes.Shape;
 import com.mos.game_objects.shapes.module.Module;
 import com.mos.graphics.SubSpriteFileProperties;
 import com.mos.graphics.SpriteHolder;
+import com.mos.mechanics.ScoreHolder;
 import com.mos.util.GameTime;
 import com.mos.util.KeyHandler;
 import com.mos.util.Vector;
@@ -69,15 +70,13 @@ public class GameScene extends Scene
     private Shape shape;
     private static Board board;
     private ShapeGenerator shapeGenerator = new FairShapeGenerator();
-
+    private ScoreHolder scoreHolder;
 
     public GameScene(KeyHandler keyHandler)
     {
         spriteHolder = new SpriteHolder();
         this.keyHandler = keyHandler;
-
-
-
+        
         spriteHolder.addSpritePath(String.format("sprites/%s.png", BOARD), null);
         spriteHolder.addSpritePath(String.format("sprites/%s.png", SQUARE),
                 new SubSpriteFileProperties(35,35, 7, SQUARE_NAME.getAllNames()));
@@ -93,11 +92,12 @@ public class GameScene extends Scene
 
         board = new Board(BOARD_POSITION_X, BOARD_POSITION_Y, spriteHolder.getSprite(Board.getSpriteName()));
 
-        shape = shapeGenerator.next();
+        scoreHolder = new ScoreHolder(
+            board.getPosition().getX() + board.PIXEL_WIDTH + 100,
+            board.getPosition().getY() + 30
+        );
 
-//        Timer timer = new Timer(DROP_PAUSE_TIME,
-//            event -> moveShape(Vector.DOWN, Shape.MODULE_SIDE_PIXEL_LENGTH));
-//        timer.start();
+        shape = shapeGenerator.next();
     }
 
     private Timer downTimer;
@@ -114,7 +114,6 @@ public class GameScene extends Scene
         if (keyHandler.down.wasPressed())
         {
             downTimer = new Timer(timerDelay, e -> moveShape(Vector.DOWN, offset));
-
             downTimer.start();
         }
         else if (keyHandler.down.wasReleased())
@@ -140,7 +139,6 @@ public class GameScene extends Scene
         if (keyHandler.x.wasPressed())
         {
             smartRotateR();
-
         }
     }
 
@@ -150,9 +148,7 @@ public class GameScene extends Scene
     {
         final String dropTimer = "dropTimer";
         final String respawnTimer = "respawnTimer";
-
-        //        Physics.checkCollisions();
-
+        
         GameTime.startTimer(dropTimer);
         if (GameTime.ifPassedRestart(dropTimer, DROP_PAUSE_TIME))
         {
@@ -171,22 +167,35 @@ public class GameScene extends Scene
             }
         }
 
-        board.returnDeleteFullRows();
-    }
+        int counter = 0;
 
-//    private void changeShape()
-//    {
-//
-//    }
+        while (board.returnDeleteFullRows() != 0)
+            counter++;
+
+        switch (counter)
+        {
+            case 1:
+                scoreHolder.add(40);
+                break;
+            case 2:
+                scoreHolder.add(100);
+                break;
+            case 3:
+                scoreHolder.add(600);
+                break;
+            case 4:
+                scoreHolder.add(1200);
+        }
+    }
 
     @Override
     public void render(Graphics2D g)
     {
         board.render(g);
         shape.render(g);
+        scoreHolder.render(g);
     }
-
-
+    
     private boolean moveShape(Vector direction, int stepCount, boolean checkBorder)
     {
         if (canShapeMove(direction, checkBorder))
@@ -196,6 +205,7 @@ public class GameScene extends Scene
         }
         return false;
     }
+    
     private boolean moveShape(Vector direction, int stepCount)
     {
         return moveShape(direction, stepCount, true);
@@ -205,39 +215,6 @@ public class GameScene extends Scene
 
     private boolean canShapeMove(Vector direction, boolean checkBorder)
     {
-//        if (direction.equals(Vector.RIGHT))
-//        {
-//            for(Module module : shape.getModules())
-//            {
-//                int x = module.getBoardPosition().getX();
-//
-//                if (x == board.WIDTH - 1)
-//                    return false;
-//            }
-//        }
-//
-//        else if (direction.equals(Vector.LEFT))
-//        {
-//            for(Module module : shape.getModules())
-//            {
-//                int x = module.getBoardPosition().getX();
-//
-//                if (x == 0)
-//                    return false;
-//            }
-//        }
-//
-//        else if (direction.equals(Vector.DOWN))
-//        {
-//            for(Module module : shape.getModules())
-//            {
-//                int y = module.getBoardPosition().getY();
-//
-//                if (y == board.HEIGHT - 1)
-//                    return false;
-//            }
-//        }
-
         try
         {
             for (Module module : shape.getModules())

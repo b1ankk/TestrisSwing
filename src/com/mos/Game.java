@@ -24,12 +24,10 @@ public class Game implements Runnable
 
     private BufferedImage bufferedImage;
     private Graphics2D g;
-//    private JPanel gamePanel;
     private Canvas canvas;
 
     private BufferStrategy bufferStrategy;
-
-//    private SpriteHolder spriteHolder;
+    
     private Scene activeScene;
 
     public Game(int width, int height, String title)
@@ -55,17 +53,14 @@ public class Game implements Runnable
 
     private void render()
     {
-
         g.setColor(Color.LIGHT_GRAY);
         g.fillRect(0, 0, width, height);
-        //gamePanel.repaint();
+        
         activeScene.render(g);
-
     }
 
     private void draw()
     {
-//        Graphics2D g2 = (Graphics2D) gamePanel.getGraphics();;
         Graphics2D g2 = (Graphics2D) bufferStrategy.getDrawGraphics();
         g2.drawImage(bufferedImage, 0, 0, null);
         g2.dispose();
@@ -74,19 +69,7 @@ public class Game implements Runnable
 
     private void input()
     {
-
-    activeScene.input();
-//        if (keyHandler.up.wasPressed())
-//            System.out.println("W WAS PRESSED!!!!");
-//
-////        if (keyHandler.up.isDown())
-////            System.out.println("UP is down!");
-//
-//        if (keyHandler.up.wasReleased())
-//            System.out.println("W WAS RELEASED!!!");
-
-//        if (keyHandler.up.isUp())
-//            System.out.println("UP is up!");
+        activeScene.input();
     }
 
     private void init()
@@ -94,15 +77,12 @@ public class Game implements Runnable
         running = true;
         canvas = window.getCanvas();
         keyHandler = new KeyHandler(canvas);
-//        gamePanel = window.getWindowPanel();
-//        keyHandler = new KeyHandler(gamePanel);
-
+        
         bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         g = (Graphics2D) bufferedImage.getGraphics();
 
         bufferStrategy = canvas.getBufferStrategy();
-
-//        spriteHolder = new SpriteHolder();
+        
         activeScene = new GameScene(keyHandler);
     }
 
@@ -111,7 +91,7 @@ public class Game implements Runnable
     {
         init();
 
-        double goalFrameRate = 144.0;
+        double goalFrameRate = 60;
         double frameTime = 1_000_000_000 / goalFrameRate;
         long lastFrame = System.nanoTime();
 
@@ -137,9 +117,7 @@ public class Game implements Runnable
             render();
             draw();
             frames++;
-
-
-
+            
             if (System.currentTimeMillis() - timer >= 1000)
             {
                 System.out.println("FPS: " + frames);
